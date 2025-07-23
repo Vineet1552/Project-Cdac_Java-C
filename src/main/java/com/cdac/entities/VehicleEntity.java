@@ -20,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Vehicle extends BaseEntity {
+public class VehicleEntity extends BaseEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)

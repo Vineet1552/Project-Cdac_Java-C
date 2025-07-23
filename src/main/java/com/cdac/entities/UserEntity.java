@@ -57,6 +57,6 @@ public class UserEntity extends BaseEntity {
 	private Boolean isActive;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Vehicle> vehicles = new ArrayList<>();	
+	private List<VehicleEntity> vehicles = new ArrayList<>();	
 	
 }
