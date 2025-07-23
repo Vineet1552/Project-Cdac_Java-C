@@ -1,7 +1,12 @@
 package com.cdac.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,4 +42,10 @@ public class PackageEntity extends BaseEntity {
     @Positive(message = "Duration must be a positive number (in days/hours)")
     @Column(nullable = false)
     private Integer duration; 
+    
+    
+    
+    // One-to-Many relationship with BookingEntity
+    @OneToMany(mappedBy = "packageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingEntity> bookings = new ArrayList<>();
 }

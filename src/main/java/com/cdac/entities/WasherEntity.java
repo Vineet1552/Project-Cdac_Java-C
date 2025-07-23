@@ -1,7 +1,12 @@
 package com.cdac.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -44,4 +49,12 @@ public class WasherEntity extends BaseEntity {
     @NotBlank(message = "Area is required")
     @Column(nullable = false)
     private String area; // e.g., locality or service area
+    
+    
+ // Relationships
+    @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingEntity> bookings = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ReviewEntity> reviews = new ArrayList<>();
 }
