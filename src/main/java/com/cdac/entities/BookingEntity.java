@@ -2,11 +2,13 @@ package com.cdac.entities;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
@@ -37,10 +39,10 @@ public class BookingEntity extends BaseEntity {
 	    @JoinColumn(name = "vehicle_id", nullable = false)
 	    private VehicleEntity vehicle;
 	    
-	    @NotNull(message = "Package is required")
-	    @ManyToOne(fetch = FetchType.LAZY)
-	    @JoinColumn(name = "package_id", nullable = false)
-	    private PackageEntity servicePackage;
+//	    @NotNull(message = "Package is required")
+//	    @ManyToOne(fetch = FetchType.LAZY)
+//	    @JoinColumn(name = "package_id", nullable = false)
+//	    private PackageEntity servicePackage;
 	    
 	    @NotNull(message = "Washer is required")
 	    @ManyToOne(fetch = FetchType.LAZY)
@@ -58,9 +60,9 @@ public class BookingEntity extends BaseEntity {
 
 	    private String remarks;
 	    
-//	 // One-to-One with Payment
-//	    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-//	    private PaymentEntity payment;
+	 // One-to-One with Payment
+	    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+	    private PaymentEntity payment;
 	    
 	    @ManyToOne(fetch = FetchType.LAZY)
 	    @JoinColumn(name = "package_id", nullable = false)

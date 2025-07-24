@@ -10,7 +10,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -55,6 +54,7 @@ public class WasherEntity extends BaseEntity {
     @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookingEntity> bookings = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<ReviewEntity> reviews = new ArrayList<>();
+    @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewEntity> reviews = new ArrayList<>();
+
 }
