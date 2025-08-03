@@ -1,0 +1,97 @@
+package com.cdac.service;
+import com.cdac.dao.NotificationDao;
+import com.cdac.dao.UserDao;
+import com.cdac.dto.NotificationDto;
+import com.cdac.entities.NotificationEntity;
+import com.cdac.entities.UserEntity;
+import com.cdac.custom_exceptions.ResourceNotFoundException;
+import com.cdac.service.NotificationService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class NotificationServiceImpl implements NotificationService {
+
+    @Autowired
+    private NotificationDao notificationDao;
+
+    @Autowired
+    private UserDao userDao;
+
+    @Override
+    public NotificationDto createNotification(NotificationDto dto) {
+        NotificationEntity entity = new NotificationEntity();
+
+        UserEntity user = userDao.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", dto.getUserId()));
+
+        entity.setUser(user);
+        entity.setMessage(dto.getMessage());
+        entity.setType(dto.getType());
+        entity.setStatus(dto.getStatus());
+        entity.setCreatedAt(LocalDateTime.now());
+
+        NotificationEntity saved = notificationDao.save(entity);
+        return mapToDto(saved);
+    }
+
+    @Override
+    public NotificationDto getNotificationById(Long id) {
+        NotificationEntity entity = notificationDao.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", id));
+        return mapToDto(entity);
+    }
+
+    @Override
+    public List<NotificationDto> getAllNotifications() {
+        return notificationDao.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NotificationDto> getNotificationsByUserId(Long userId) {
+        return notificationDao.findAll()
+                .stream()
+                .filter(n -> n.getUser().getId().equals(userId))
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public NotificationDto updateNotification(Long id, NotificationDto dto) {
+        NotificationEntity entity = notificationDao.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", id));
+
+        entity.setMessage(dto.getMessage());
+        entity.setType(dto.getType());
+        entity.setStatus(dto.getStatus());
+        NotificationEntity updated = notificationDao.save(entity);
+
+        return mapToDto(updated);
+    }
+
+    @Override
+    public void deleteNotification(Long id) {
+        NotificationEntity entity = notificationDao.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", id));
+        notificationDao.delete(entity);
+    }
+
+    private NotificationDto mapToDto(NotificationEntity e) {
+        NotificationDto dto = new NotificationDto();
+        dto.setId(e.getId());
+        dto.setUserId(e.getUser().getId());
+        dto.setMessage(e.getMessage());
+        dto.setType(e.getType());
+        dto.setStatus(e.getStatus());
+        dto.setCreatedAt(e.getCreatedAt().toString());
+        return dto;
+    }
+}
