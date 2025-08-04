@@ -5,6 +5,8 @@ import com.cdac.dto.UserResponseDto;
 import com.cdac.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
 
-    @Autowired
+	@Autowired
     private UserService userService;
 
     @PostMapping

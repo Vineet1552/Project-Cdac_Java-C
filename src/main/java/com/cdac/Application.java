@@ -18,7 +18,7 @@ public class Application {
 	 * Configure ModelMapper as spring bean - so thar SC will manage it's life cycle
 	 * + provide it as the depcy
 	 */
-	@Bean // method level annotation - to tell SC , following method
+	 // method level annotation - to tell SC , following method
 	// rets an object - which has to be managed as a spring bean
 	// manages - life cycle +
 	public ModelMapper modelMapper() {

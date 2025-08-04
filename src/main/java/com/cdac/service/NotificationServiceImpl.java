@@ -24,12 +24,11 @@ public class NotificationServiceImpl implements NotificationService {
     private UserDao userDao;
 
     @Override
-    public NotificationDto createNotification(NotificationDto dto) {
+    public NotificationDto createNotification(NotificationDto dto, String userEmail) {
+        UserEntity user = userDao.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+
         NotificationEntity entity = new NotificationEntity();
-
-        UserEntity user = userDao.findById(dto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", dto.getUserId()));
-
         entity.setUser(user);
         entity.setMessage(dto.getMessage());
         entity.setType(dto.getType());
@@ -41,10 +40,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationDto getNotificationById(Long id) {
-        NotificationEntity entity = notificationDao.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", id));
-        return mapToDto(entity);
+    public List<NotificationDto> getNotificationsByUserEmail(String email) {
+        UserEntity user = userDao.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        return notificationDao.findAll()
+                .stream()
+                .filter(n -> n.getUser().getId().equals(user.getId()))
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -82,6 +86,13 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationEntity entity = notificationDao.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", id));
         notificationDao.delete(entity);
+    }
+    
+    @Override
+    public NotificationDto getNotificationById(Long id) {
+        NotificationEntity entity = notificationDao.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", id));
+        return mapToDto(entity);
     }
 
     private NotificationDto mapToDto(NotificationEntity e) {

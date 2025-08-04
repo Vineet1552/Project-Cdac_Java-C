@@ -33,12 +33,12 @@ public class ReviewServiceImpl implements ReviewService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public ReviewDto createReview(ReviewDto dto) {
-        UserEntity user = userDao.findById(dto.getUserId())
-            .orElseThrow(() -> new ResourceNotFoundException("User", "id", dto.getUserId()));
+    public ReviewDto createReview(ReviewDto dto, String email) {
+        UserEntity user = userDao.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
         WasherEntity washer = washerDao.findById(dto.getWasherId())
-            .orElseThrow(() -> new ResourceNotFoundException("Washer", "id", dto.getWasherId()));
+            .orElseThrow(() -> new RuntimeException("Washer not found with ID: " + dto.getWasherId()));
 
         ReviewEntity entity = new ReviewEntity();
         entity.setUser(user);
@@ -48,9 +48,8 @@ public class ReviewServiceImpl implements ReviewService {
         entity.setReviewDate(LocalDateTime.now());
 
         ReviewEntity saved = reviewDao.save(entity);
-        return toDto(saved);
+        return toDto(saved);    
     }
-
     @Override
     public ReviewDto getReviewById(Long id) {
         ReviewEntity entity = reviewDao.findById(id)

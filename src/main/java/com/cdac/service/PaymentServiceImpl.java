@@ -7,13 +7,14 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.dao.BookingDao;
 import com.cdac.dao.PaymentDao;
+import com.cdac.dao.UserDao;
 import com.cdac.dto.PaymentDto;
 import com.cdac.entities.BookingEntity;
 import com.cdac.entities.PaymentEntity;
-import com.cdac.custom_exceptions.ResourceNotFoundException;
-import com.cdac.service.PaymentService;
+import com.cdac.entities.UserEntity;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -23,12 +24,25 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private BookingDao bookingDao;
+    
+    @Autowired
+    private UserDao userDao;
 
     @Override
-    public PaymentDto createPayment(PaymentDto dto) {
-        BookingEntity booking = bookingDao.findById(dto.getBookingId())
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + dto.getBookingId()));
+    public PaymentDto createPayment(PaymentDto dto, String userEmail) {
+        // Find user by email
+        UserEntity user = userDao.findByEmail(userEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + userEmail));
 
+        // Find booking and ensure it's linked to this user
+        BookingEntity booking = bookingDao.findById(dto.getBookingId())
+            .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + dto.getBookingId()));
+
+        if (!booking.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: Booking does not belong to this user");
+        }
+
+        // Proceed to create payment
         PaymentEntity entity = new PaymentEntity();
         entity.setAmount(dto.getAmount());
         entity.setPaymentDate(LocalDateTime.now());

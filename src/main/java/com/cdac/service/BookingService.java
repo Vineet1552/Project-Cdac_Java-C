@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.cdac.dto.BookingDto;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface BookingService {
-    BookingDto createBooking(BookingDto bookingDto);
+	BookingDto createBooking(BookingDto dto, String userEmail);
     BookingDto getBookingById(Long id);
     List<BookingDto> getAllBookings();
     BookingDto updateBooking(Long id, BookingDto bookingDto);

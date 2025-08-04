@@ -1,12 +1,12 @@
 package com.cdac.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.dao.BookingDao;
 import com.cdac.dao.PackageDao;
 import com.cdac.dao.UserDao;
@@ -18,8 +18,9 @@ import com.cdac.entities.PackageEntity;
 import com.cdac.entities.UserEntity;
 import com.cdac.entities.VehicleEntity;
 import com.cdac.entities.WasherEntity;
-import com.cdac.custom_exceptions.ResourceNotFoundException;
-import com.cdac.service.BookingService;
+import com.cdac.security.JwtUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -38,13 +39,16 @@ public class BookingServiceImpl implements BookingService {
 
     @Autowired
     private PackageDao packageDao;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Override
-    public BookingDto createBooking(BookingDto dto) {
-        BookingEntity entity = new BookingEntity();
-
-        UserEntity user = userDao.findById(dto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", dto.getUserId()));
+    public BookingDto createBooking(BookingDto dto, String userEmail) {
+     
+        UserEntity user = userDao.findByEmail(userEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+        // 🔍 Get other entities
         VehicleEntity vehicle = vehicleDao.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "ID", dto.getVehicleId()));
         WasherEntity washer = washerDao.findById(dto.getWasherId())
@@ -52,19 +56,17 @@ public class BookingServiceImpl implements BookingService {
         PackageEntity pkg = packageDao.findById(dto.getPackageId())
                 .orElseThrow(() -> new ResourceNotFoundException("Package", "ID", dto.getPackageId()));
 
+        // 🧱 Create and save booking
+        BookingEntity entity = new BookingEntity();
         entity.setUser(user);
         entity.setVehicle(vehicle);
         entity.setWasher(washer);
         entity.setPackageEntity(pkg);
-//        entity.setBookingDate(LocalDateTime.parse(dto.getBookingDate()));
         entity.setBookingDate(dto.getBookingDate());
         entity.setStatus(dto.getStatus());
         entity.setRemarks(dto.getRemarks());
-        
-        BookingEntity saved = bookingDao.save(entity);
-//        dto.setId(saved.getId());
 
-//        return dto;
+        BookingEntity saved = bookingDao.save(entity);
         return mapToDto(saved);
     }
 
