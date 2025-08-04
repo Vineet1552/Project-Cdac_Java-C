@@ -48,7 +48,7 @@ public class BookingServiceImpl implements BookingService {
      
         UserEntity user = userDao.findByEmail(userEmail)
             .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
-        // 🔍 Get other entities
+      
         VehicleEntity vehicle = vehicleDao.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "ID", dto.getVehicleId()));
         WasherEntity washer = washerDao.findById(dto.getWasherId())
@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
         PackageEntity pkg = packageDao.findById(dto.getPackageId())
                 .orElseThrow(() -> new ResourceNotFoundException("Package", "ID", dto.getPackageId()));
 
-        // 🧱 Create and save booking
+        
         BookingEntity entity = new BookingEntity();
         entity.setUser(user);
         entity.setVehicle(vehicle);
@@ -100,6 +100,14 @@ public class BookingServiceImpl implements BookingService {
         BookingEntity entity = bookingDao.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "ID", id));
         bookingDao.delete(entity);
+    }
+    
+    @Override
+    public List<BookingDto> getBookingsByUserEmail(String email) {
+        UserEntity user = userDao.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        List<BookingEntity> bookings = bookingDao.findByUser(user);
+        return bookings.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
     private BookingDto mapToDto(BookingEntity entity) {

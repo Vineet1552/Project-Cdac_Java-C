@@ -35,10 +35,10 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> auth
-				.requestMatchers("/users/signup", "/users/signin").permitAll()
+				.requestMatchers("/api/users/signup", "/api/users/signin").permitAll()
 
 				// useronly endpoints
-				.requestMatchers("/api/vehicles/**").hasRole("USER").requestMatchers("/api/bookings/**").hasRole("USER")
+				.requestMatchers("/api/vehicles/**").hasRole("USER").requestMatchers("/api/bookings/**").hasAnyRole("USER","ADMIN")
 				.requestMatchers("/api/payments/**").hasRole("USER").requestMatchers("/api/reviews/**").hasRole("USER")
 
 				// admin only endpoints

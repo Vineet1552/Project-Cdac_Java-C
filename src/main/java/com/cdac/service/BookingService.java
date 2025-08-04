@@ -12,4 +12,5 @@ public interface BookingService {
     List<BookingDto> getAllBookings();
     BookingDto updateBooking(Long id, BookingDto bookingDto);
     void deleteBooking(Long id);
+    List<BookingDto> getBookingsByUserEmail(String email);
 }
