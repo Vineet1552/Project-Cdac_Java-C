@@ -6,15 +6,24 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cdac.custom_exceptions.ResourceNotFoundException;
+import com.cdac.dao.BookingDao;
+import com.cdac.dao.PackageDao;
 import com.cdac.dao.UserDao;
 import com.cdac.dao.VehicleDao;
+import com.cdac.dao.WasherDao;
 import com.cdac.dto.VehicleDto;
 import com.cdac.entities.UserEntity;
 import com.cdac.entities.VehicleEntity;
+import com.cdac.security.JwtUtils;
+
+import lombok.AllArgsConstructor;
 
 @Service
+@Transactional
+@AllArgsConstructor
 public class VehicleServiceImpl implements VehicleService {
 
     @Autowired

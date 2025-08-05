@@ -11,6 +11,7 @@ import com.cdac.service.PackageService;
 
 import jakarta.validation.Valid;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/packages")
 public class PackageController {

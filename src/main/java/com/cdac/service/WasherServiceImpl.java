@@ -5,18 +5,30 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cdac.dao.BookingDao;
+import com.cdac.dao.PackageDao;
+import com.cdac.dao.UserDao;
+import com.cdac.dao.VehicleDao;
 import com.cdac.dao.WasherDao;
 import com.cdac.dto.WasherDto;
 import com.cdac.entities.WasherEntity;
+import com.cdac.security.JwtUtils;
 import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.service.WasherService;
 
+import lombok.AllArgsConstructor;
+
 @Service
+@Transactional
+@AllArgsConstructor
 public class WasherServiceImpl implements WasherService {
 
     @Autowired
     private WasherDao washerDao;
+    
+    private final PasswordEncoder passwordEncoder; // inject
 
     @Override
     public WasherDto createWasher(WasherDto dto) {
@@ -32,6 +44,7 @@ public class WasherServiceImpl implements WasherService {
 
         washer.setName(dto.getName());
         washer.setEmail(dto.getEmail());
+        washer.setPassword(dto.getPassword());
         washer.setPhone(dto.getPhone());
         washer.setStatus(dto.getStatus());
         washer.setRating(dto.getRating());
@@ -65,13 +78,17 @@ public class WasherServiceImpl implements WasherService {
 
     private WasherDto entityToDto(WasherEntity entity) {
         WasherDto dto = new WasherDto();
-        dto.setId(entity.getId());
+//        dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setEmail(entity.getEmail());
+        dto.setPassword(dto.getPassword());
         dto.setPhone(entity.getPhone());
         dto.setStatus(entity.getStatus());
         dto.setRating(entity.getRating());
         dto.setArea(entity.getArea());
+        if (dto.getPassword() != null) {
+            entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
         return dto;
     }
 
@@ -79,6 +96,7 @@ public class WasherServiceImpl implements WasherService {
         WasherEntity entity = new WasherEntity();
         entity.setName(dto.getName());
         entity.setEmail(dto.getEmail());
+        entity.setPassword(dto.getPassword());
         entity.setPhone(dto.getPhone());
         entity.setStatus(dto.getStatus());
         entity.setRating(dto.getRating());

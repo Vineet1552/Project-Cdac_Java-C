@@ -1,17 +1,24 @@
 package com.cdac.service;
 
+import com.cdac.dao.BookingDao;
+import com.cdac.dao.PackageDao;
 import com.cdac.dao.ReviewDao;
 import com.cdac.dao.UserDao;
+import com.cdac.dao.VehicleDao;
 import com.cdac.dao.WasherDao;
 import com.cdac.dto.ReviewDto;
 import com.cdac.entities.ReviewEntity;
 import com.cdac.entities.UserEntity;
 import com.cdac.entities.WasherEntity;
+import com.cdac.security.JwtUtils;
 import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.service.ReviewService;
 
+import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +26,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
+@AllArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
     @Autowired

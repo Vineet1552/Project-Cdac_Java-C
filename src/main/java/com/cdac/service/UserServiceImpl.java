@@ -11,7 +11,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cdac.custom_exceptions.ResourceNotFoundException;
+import com.cdac.dao.BookingDao;
+import com.cdac.dao.PackageDao;
 import com.cdac.dao.UserDao;
+import com.cdac.dao.VehicleDao;
+import com.cdac.dao.WasherDao;
 import com.cdac.dto.AuthResp;
 import com.cdac.dto.SignInDto;
 import com.cdac.dto.SignupReqDto;
@@ -19,10 +23,14 @@ import com.cdac.dto.UserRequestDto;
 import com.cdac.dto.UserResponseDto;
 import com.cdac.dto.VehicleDto;
 import com.cdac.entities.UserEntity;
+import com.cdac.security.JwtUtils;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 @Service
+@Transactional
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
 	@Autowired

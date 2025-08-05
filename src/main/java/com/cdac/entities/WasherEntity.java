@@ -32,6 +32,10 @@ public class WasherEntity extends BaseEntity {
     @NotBlank(message = "Email is required")
     @Column(nullable = false, unique = true)
     private String email;
+    
+    @NotBlank(message = "Password is required")
+	@Column(nullable = false)
+	private String password;
 
     @NotBlank(message = "Phone number is required")
     @Column(nullable = false)

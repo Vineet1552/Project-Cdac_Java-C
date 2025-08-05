@@ -1,6 +1,7 @@
 package com.cdac.controller;
 
 import com.cdac.dto.WasherDto;
+import com.cdac.dto.WasherRespDto;
 import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.service.WasherService;
 
@@ -21,9 +22,18 @@ public class WasherController {
 
     // Create Washer
     @PostMapping
-    public ResponseEntity<WasherDto> createWasher(@Valid @RequestBody WasherDto washerDto) {
+    public ResponseEntity<WasherRespDto> createWasher(@Valid @RequestBody WasherDto washerDto) {
         WasherDto createdWasher = washerService.createWasher(washerDto);
-        return ResponseEntity.ok(createdWasher);
+        
+        WasherRespDto resp = new WasherRespDto();
+        resp.setName(createdWasher.getName());
+        resp.setEmail(createdWasher.getEmail());
+        resp.setPhone(createdWasher.getPhone());
+        resp.setStatus(createdWasher.getStatus());
+        resp.setRating(createdWasher.getRating());
+        resp.setArea(createdWasher.getArea());
+
+        return ResponseEntity.ok(resp);
     }
 
     // Get all Washers

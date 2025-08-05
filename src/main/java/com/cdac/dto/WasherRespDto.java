@@ -6,12 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 
-public class WasherDto {
-//	private Long id;
-	
-    private String name;
+public class WasherRespDto {
+	private String name;
     private String email;
-    private String password;
     private String phone;
     private String status;
     private Double rating;

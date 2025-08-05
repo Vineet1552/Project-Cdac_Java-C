@@ -1,20 +1,30 @@
 package com.cdac.service;
+import com.cdac.dao.BookingDao;
 import com.cdac.dao.NotificationDao;
+import com.cdac.dao.PackageDao;
 import com.cdac.dao.UserDao;
+import com.cdac.dao.VehicleDao;
+import com.cdac.dao.WasherDao;
 import com.cdac.dto.NotificationDto;
 import com.cdac.entities.NotificationEntity;
 import com.cdac.entities.UserEntity;
+import com.cdac.security.JwtUtils;
 import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.service.NotificationService;
 
+import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
+@AllArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
