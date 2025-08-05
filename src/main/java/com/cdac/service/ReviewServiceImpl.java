@@ -1,18 +1,13 @@
 package com.cdac.service;
 
-import com.cdac.dao.BookingDao;
-import com.cdac.dao.PackageDao;
 import com.cdac.dao.ReviewDao;
 import com.cdac.dao.UserDao;
-import com.cdac.dao.VehicleDao;
 import com.cdac.dao.WasherDao;
 import com.cdac.dto.ReviewDto;
 import com.cdac.entities.ReviewEntity;
 import com.cdac.entities.UserEntity;
 import com.cdac.entities.WasherEntity;
-import com.cdac.security.JwtUtils;
 import com.cdac.custom_exceptions.ResourceNotFoundException;
-import com.cdac.service.ReviewService;
 
 import lombok.AllArgsConstructor;
 
@@ -44,10 +39,10 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewDto createReview(ReviewDto dto, String email) {
         UserEntity user = userDao.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+            .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         WasherEntity washer = washerDao.findById(dto.getWasherId())
-            .orElseThrow(() -> new RuntimeException("Washer not found with ID: " + dto.getWasherId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Washer", "id", dto.getWasherId()));
 
         ReviewEntity entity = new ReviewEntity();
         entity.setUser(user);
@@ -57,8 +52,9 @@ public class ReviewServiceImpl implements ReviewService {
         entity.setReviewDate(LocalDateTime.now());
 
         ReviewEntity saved = reviewDao.save(entity);
-        return toDto(saved);    
+        return toDto(saved);
     }
+
     @Override
     public ReviewDto getReviewById(Long id) {
         ReviewEntity entity = reviewDao.findById(id)
@@ -69,7 +65,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<ReviewDto> getAllReviews() {
         return reviewDao.findAll()
-            .stream().map(this::toDto)
+            .stream()
+            .map(this::toDto)
             .collect(Collectors.toList());
     }
 
@@ -94,6 +91,17 @@ public class ReviewServiceImpl implements ReviewService {
 
         ReviewEntity updated = reviewDao.save(entity);
         return toDto(updated);
+    }
+
+    @Override
+    public List<ReviewDto> getReviewsForWasherId(Long washerId) {
+        WasherEntity washer = washerDao.findById(washerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Washer", "id", washerId));
+
+        return reviewDao.findAll().stream()
+            .filter(r -> r.getWasher().getId().equals(washerId))
+            .map(this::toDto)
+            .collect(Collectors.toList());
     }
 
     private ReviewDto toDto(ReviewEntity entity) {

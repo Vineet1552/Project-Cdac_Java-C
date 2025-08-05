@@ -1,91 +1,116 @@
 package com.cdac.service;
 
+
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.cdac.dao.BookingDao;
+import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.dao.PackageDao;
-import com.cdac.dao.UserDao;
-import com.cdac.dao.VehicleDao;
 import com.cdac.dao.WasherDao;
 import com.cdac.dto.PackageDto;
 import com.cdac.entities.PackageEntity;
-import com.cdac.security.JwtUtils;
-import com.cdac.custom_exceptions.ResourceNotFoundException;
-import com.cdac.service.PackageService;
-
-import lombok.AllArgsConstructor;
+import com.cdac.entities.WasherEntity;
 
 @Service
-@Transactional
-@AllArgsConstructor
 public class PackageServiceImpl implements PackageService {
 
     @Autowired
     private PackageDao packageDao;
 
+    @Autowired
+    private WasherDao washerDao;
+
     @Override
-    public PackageDto createPackage(PackageDto dto) {
-        PackageEntity entity = mapToEntity(dto);
+    public PackageDto createPackage(PackageDto packageDto, String washerEmail) {
+        WasherEntity washer = washerDao.findByEmail(washerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Washer not found with email: " + washerEmail));
+
+        PackageEntity entity = dtoToEntity(packageDto);
+        entity.setWasher(washer);
+
         PackageEntity saved = packageDao.save(entity);
-        return mapToDto(saved);
+        return entityToDto(saved);
     }
 
     @Override
-    public PackageDto updatePackage(Long id, PackageDto dto) {
-        PackageEntity entity = packageDao.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Package", "id", id));
+    public PackageDto updatePackage(Long id, PackageDto packageDto, String washerEmail) {
+        PackageEntity existing = packageDao.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Package not found with ID: " + id));
 
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
-        entity.setPrice(dto.getPrice());
-        entity.setDuration(dto.getDuration());
+        if (!existing.getWasher().getEmail().equals(washerEmail)) {
+            throw new RuntimeException("Unauthorized access: This package does not belong to the logged-in washer");
+        }
 
-        return mapToDto(packageDao.save(entity));
+        existing.setName(packageDto.getName());
+        existing.setDescription(packageDto.getDescription());
+        existing.setPrice(packageDto.getPrice());
+        existing.setDuration(packageDto.getDuration());
+      //  existing.setImage(packageDto.getImage());
+
+        PackageEntity updated = packageDao.save(existing);
+        return entityToDto(updated);
     }
 
     @Override
-    public String deletePackage(Long id) {
-        PackageEntity entity = packageDao.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Package", "id", id));
-        packageDao.delete(entity);
-        
-        return "Package with ID " + id + " has been deleted successfully.";
+    public String deletePackage(Long id, String washerEmail) {
+        PackageEntity existing = packageDao.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Package not found with ID: " + id));
+
+        if (!existing.getWasher().getEmail().equals(washerEmail)) {
+            throw new RuntimeException("Unauthorized access: This package does not belong to the logged-in washer");
+        }
+
+        packageDao.delete(existing);
+        return "Package deleted successfully.";
     }
 
     @Override
     public PackageDto getPackageById(Long id) {
         PackageEntity entity = packageDao.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Package", "id", id));
-        return mapToDto(entity);
+                .orElseThrow(() -> new ResourceNotFoundException("Package not found with ID: " + id));
+
+        return entityToDto(entity);
     }
 
     @Override
-    public List<PackageDto> getAllPackages() {
-        List<PackageEntity> list = packageDao.findAll();
-        return list.stream().map(this::mapToDto).collect(Collectors.toList());
+    public List<PackageDto> getAllPackagesForWasher(String washerEmail) {
+        WasherEntity washer = washerDao.findByEmail(washerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Washer not found with email: " + washerEmail));
+
+        List<PackageEntity> packages = packageDao.findByWasher(washer);
+
+        return packages.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
 
-    private PackageDto mapToDto(PackageEntity entity) {
+    // ------------------------
+    // DTO ↔ Entity conversion
+    // ------------------------
+
+    private PackageDto entityToDto(PackageEntity entity) {
         PackageDto dto = new PackageDto();
-//        dto.setId(entity.getId());
+        //dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
         dto.setPrice(entity.getPrice());
         dto.setDuration(entity.getDuration());
+       // dto.setImage(entity.getImage());
+        // You may optionally include washerId or email if needed
         return dto;
     }
 
-    private PackageEntity mapToEntity(PackageDto dto) {
+    private PackageEntity dtoToEntity(PackageDto dto) {
         PackageEntity entity = new PackageEntity();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
         entity.setPrice(dto.getPrice());
         entity.setDuration(dto.getDuration());
+        //entity.setImage(dto.getImage());
         return entity;
     }
 }

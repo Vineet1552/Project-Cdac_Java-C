@@ -6,13 +6,13 @@ import com.cdac.dto.PackageDto;
 
 public interface PackageService {
 	
-	PackageDto createPackage(PackageDto packageDto);
+    PackageDto createPackage(PackageDto packageDto, String washerEmail);
 
-    PackageDto updatePackage(Long id, PackageDto packageDto);
+    PackageDto updatePackage(Long id, PackageDto packageDto, String washerEmail);
 
-    String deletePackage(Long id);
+    String deletePackage(Long id, String washerEmail);
 
     PackageDto getPackageById(Long id);
 
-    List<PackageDto> getAllPackages();
+    List<PackageDto> getAllPackagesForWasher(String washerEmail);
 }

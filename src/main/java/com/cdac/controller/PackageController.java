@@ -1,48 +1,68 @@
 package com.cdac.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.cdac.dto.PackageDto;
 import com.cdac.service.PackageService;
+import com.cdac.security.JwtUtils;
 
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = "http://localhost:5173")
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/packages")
+@RequestMapping("/api/washer/packages")
 public class PackageController {
 
     @Autowired
     private PackageService packageService;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    // Create new service package
     @PostMapping
-    public ResponseEntity<PackageDto> createPackage(@Valid @RequestBody PackageDto dto) {
-        return ResponseEntity.ok(packageService.createPackage(dto));
+    public ResponseEntity<PackageDto> createPackage(@Valid @RequestBody PackageDto packageDto,
+                                                    Authentication authentication) {
+        String washerEmail = authentication.getName();
+        PackageDto createdPackage = packageService.createPackage(packageDto, washerEmail);
+        return ResponseEntity.ok(createdPackage);
     }
 
+    // Update existing package (only if owned by logged-in washer)
     @PutMapping("/{id}")
     public ResponseEntity<PackageDto> updatePackage(@PathVariable Long id,
-                                                    @Valid @RequestBody PackageDto dto) {
-        return ResponseEntity.ok(packageService.updatePackage(id, dto));
+                                                    @Valid @RequestBody PackageDto packageDto,
+                                                    Authentication authentication) {
+        String washerEmail = authentication.getName();
+        PackageDto updatedPackage = packageService.updatePackage(id, packageDto, washerEmail);
+        return ResponseEntity.ok(updatedPackage);
     }
 
+    // Delete package (only if owned by logged-in washer)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePackage(@PathVariable Long id) {
-        packageService.deletePackage(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deletePackage(@PathVariable Long id,
+                                                Authentication authentication) {
+        String washerEmail = authentication.getName();
+        String message = packageService.deletePackage(id, washerEmail);
+        return ResponseEntity.ok(message);
     }
 
+    // Get specific package (anyone can view a package by ID)
     @GetMapping("/{id}")
-    public ResponseEntity<PackageDto> getPackage(@PathVariable Long id) {
-        return ResponseEntity.ok(packageService.getPackageById(id));
+    public ResponseEntity<PackageDto> getPackageById(@PathVariable Long id) {
+        PackageDto pkg = packageService.getPackageById(id);
+        return ResponseEntity.ok(pkg);
     }
 
+    // Get all packages of the currently logged-in washer
     @GetMapping
-    public ResponseEntity<List<PackageDto>> getAllPackages() {
-        return ResponseEntity.ok(packageService.getAllPackages());
+    public ResponseEntity<List<PackageDto>> getAllPackages(Authentication authentication) {
+        String washerEmail = authentication.getName();
+        List<PackageDto> washerPackages = packageService.getAllPackagesForWasher(washerEmail);
+        return ResponseEntity.ok(washerPackages);
     }
 }

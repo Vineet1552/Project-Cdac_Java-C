@@ -21,7 +21,6 @@ import com.cdac.entities.VehicleEntity;
 import com.cdac.entities.WasherEntity;
 import com.cdac.security.JwtUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -49,18 +48,18 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto createBooking(BookingDto dto, String userEmail) {
-     
         UserEntity user = userDao.findByEmail(userEmail)
             .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
-      
+
         VehicleEntity vehicle = vehicleDao.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "ID", dto.getVehicleId()));
+
         WasherEntity washer = washerDao.findById(dto.getWasherId())
                 .orElseThrow(() -> new ResourceNotFoundException("Washer", "ID", dto.getWasherId()));
+
         PackageEntity pkg = packageDao.findById(dto.getPackageId())
                 .orElseThrow(() -> new ResourceNotFoundException("Package", "ID", dto.getPackageId()));
 
-        
         BookingEntity entity = new BookingEntity();
         entity.setUser(user);
         entity.setVehicle(vehicle);
@@ -78,7 +77,6 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(Long id) {
         BookingEntity entity = bookingDao.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "ID", id));
-
         return mapToDto(entity);
     }
 
@@ -105,24 +103,31 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "ID", id));
         bookingDao.delete(entity);
     }
-    
+
     @Override
     public List<BookingDto> getBookingsByUserEmail(String email) {
         UserEntity user = userDao.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         List<BookingEntity> bookings = bookingDao.findByUser(user);
+        return bookings.stream().map(this::mapToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingDto> getBookingsByWasherId(Long washerId) {
+        WasherEntity washer = washerDao.findById(washerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Washer", "ID", washerId));
+        List<BookingEntity> bookings = bookingDao.findByWasher(washer);
         return bookings.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
     private BookingDto mapToDto(BookingEntity entity) {
         BookingDto dto = new BookingDto();
-//        dto.setId(entity.getId());
+       // dto.setId(entity.getId());
         dto.setUserId(entity.getUser().getId());
         dto.setVehicleId(entity.getVehicle().getId());
         dto.setWasherId(entity.getWasher().getId());
         dto.setPackageId(entity.getPackageEntity().getId());
         dto.setBookingDate(entity.getBookingDate());
-        
         dto.setStatus(entity.getStatus());
         dto.setRemarks(entity.getRemarks());
         return dto;

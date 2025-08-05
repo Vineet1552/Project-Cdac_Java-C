@@ -96,6 +96,14 @@ public class SecurityConfig {
 	            // Shared endpoints
 	            .requestMatchers("/api/packages/**").hasAnyRole("USER", "ADMIN")
 	            .requestMatchers("/api/notifications/**").hasAnyRole("USER", "ADMIN")
+	            
+	            //washer end points
+	            .requestMatchers("/api/washers/signup", "/api/washers/signin").permitAll()
+	            .requestMatchers("/api/packages/**").hasRole("WASHER")
+	            .requestMatchers("/api/washers/profile/**").hasRole("WASHER")
+	            .requestMatchers("/api/washer/**").hasRole("WASHER")
+
+
 
 	            .anyRequest().authenticated()
 	        )

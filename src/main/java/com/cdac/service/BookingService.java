@@ -13,4 +13,6 @@ public interface BookingService {
     BookingDto updateBooking(Long id, BookingDto bookingDto);
     void deleteBooking(Long id);
     List<BookingDto> getBookingsByUserEmail(String email);
+    List<BookingDto> getBookingsByWasherId(Long washerId);
+
 }

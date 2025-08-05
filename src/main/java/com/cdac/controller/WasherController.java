@@ -1,14 +1,15 @@
 package com.cdac.controller;
 
 import com.cdac.dto.WasherDto;
-import com.cdac.dto.WasherRespDto;
-import com.cdac.custom_exceptions.ResourceNotFoundException;
+import com.cdac.dto.BookingDto;
+import com.cdac.dto.ReviewDto;
 import com.cdac.service.WasherService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,43 +21,71 @@ public class WasherController {
     @Autowired
     private WasherService washerService;
 
-    // Create Washer
-    @PostMapping
-    public ResponseEntity<WasherRespDto> createWasher(@Valid @RequestBody WasherDto washerDto) {
-        WasherDto createdWasher = washerService.createWasher(washerDto);
-        
-        WasherRespDto resp = new WasherRespDto();
-        resp.setName(createdWasher.getName());
-        resp.setEmail(createdWasher.getEmail());
-        resp.setPhone(createdWasher.getPhone());
-        resp.setStatus(createdWasher.getStatus());
-        resp.setRating(createdWasher.getRating());
-        resp.setArea(createdWasher.getArea());
+    // ======================== Washer Profile ========================
 
-        return ResponseEntity.ok(resp);
+    // 🔒 Washer: Get their own profile
+    @GetMapping("/profile")
+    public ResponseEntity<WasherDto> getWasherProfile() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        WasherDto profile = washerService.getWasherProfile(email);
+        return ResponseEntity.ok(profile);
     }
 
-    // Get all Washers
+    // 🔒 Washer: Update their own profile
+    @PutMapping("/profile")
+    public ResponseEntity<WasherDto> updateWasherProfile(@Valid @RequestBody WasherDto dto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        WasherDto updated = washerService.updateWasherProfile(email, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    // 🔒 Washer: Delete their own profile
+    @DeleteMapping("/profile")
+    public ResponseEntity<String> deleteWasherProfile() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        washerService.deleteWasherProfile(email);
+        return ResponseEntity.ok("Washer profile deleted successfully");
+    }
+
+    // ======================== Washer-specific Endpoints ========================
+
+    // 🔒 Washer: View all their bookings
+    @GetMapping("/bookings")
+    public ResponseEntity<List<BookingDto>> getWasherBookings() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<BookingDto> bookings = washerService.getWasherBookings(email);
+        return ResponseEntity.ok(bookings);
+    }
+
+    // 🔒 Washer: View all reviews given to them
+    @GetMapping("/reviews")
+    public ResponseEntity<List<ReviewDto>> getWasherReviews() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<ReviewDto> reviews = washerService.getWasherReviews(email);
+        return ResponseEntity.ok(reviews);
+    }
+
+    // ======================== Admin CRUD Operations ========================
+
+    // 🔒 Admin: Get all washers
     @GetMapping
     public ResponseEntity<List<WasherDto>> getAllWashers() {
         return ResponseEntity.ok(washerService.getAllWashers());
     }
 
-    // Get single Washer by ID
+    // 🔒 Admin: Get washer by ID
     @GetMapping("/{id}")
     public ResponseEntity<WasherDto> getWasherById(@PathVariable Long id) {
-        WasherDto washer = washerService.getWasherById(id);
-        return ResponseEntity.ok(washer);
+        return ResponseEntity.ok(washerService.getWasherById(id));
     }
 
-    // Update Washer by ID
+    // 🔒 Admin: Update washer by ID
     @PutMapping("/{id}")
     public ResponseEntity<WasherDto> updateWasher(@PathVariable Long id, @Valid @RequestBody WasherDto washerDto) {
-        WasherDto updatedWasher = washerService.updateWasher(id, washerDto);
-        return ResponseEntity.ok(updatedWasher);
+        return ResponseEntity.ok(washerService.updateWasher(id, washerDto));
     }
 
-    // Delete Washer by ID
+    // 🔒 Admin: Delete washer by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteWasher(@PathVariable Long id) {
         washerService.deleteWasher(id);
