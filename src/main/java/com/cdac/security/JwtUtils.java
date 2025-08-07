@@ -43,9 +43,12 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication authentication) {
         String username = authentication.getName();
+        String role = authentication.getAuthorities().iterator().next().getAuthority(); // gets ROLE_WASHER etc.
+
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role) // ✅ include role in claims
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(key)

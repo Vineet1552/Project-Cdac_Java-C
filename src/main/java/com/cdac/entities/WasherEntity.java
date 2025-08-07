@@ -6,6 +6,8 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -53,17 +55,16 @@ public class WasherEntity extends BaseEntity {
     @Column(nullable = false)
     private String area; // e.g., locality or service area
     
-    
-//    //--------------->
-//    @NotBlank(message = "Role is required")
-//    @Column(nullable = false)
-//    private String role; // e.g., "ROLE_WASHER"
-    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.WASHER; 
+ 
  // Relationships
     @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookingEntity> bookings = new ArrayList<>();
 
     @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewEntity> reviews = new ArrayList<>();
+    
 
 }

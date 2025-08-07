@@ -206,6 +206,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/users/signup", "/api/users/signin").permitAll()
                 .requestMatchers("/api/washers/signup", "/api/washers/signin").permitAll()
+             //   .requestMatchers("/auth/washers/**").permitAll()
+
                 
              // Permit public access to GET /api/washers
                 .requestMatchers(HttpMethod.GET, "/api/washers").permitAll()

@@ -1,6 +1,11 @@
 package com.cdac.dto;
 
-import jakarta.validation.constraints.*;
+import com.cdac.entities.Role;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,6 +37,9 @@ public class WasherDto {
 
     @NotBlank(message = "Area is required")
     private String area;
+    
+    private Role role = Role.WASHER; // default value
+
     
 //    @NotBlank(message = "Role is required")
 //    private String role; // e.g., "ROLE_WASHER"

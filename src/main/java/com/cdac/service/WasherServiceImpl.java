@@ -1,32 +1,27 @@
 package com.cdac.service;
 
 import java.util.List;
-
-
-
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cdac.custom_exceptions.ResourceNotFoundException;
+import com.cdac.dao.PackageDao;
 import com.cdac.dao.WasherDao;
 import com.cdac.dto.BookingDto;
-import com.cdac.dto.PackageDto;
 import com.cdac.dto.ReviewDto;
 import com.cdac.dto.WasherDto;
-import com.cdac.entities.PackageEntity;
+import com.cdac.entities.Role;
 import com.cdac.entities.WasherEntity;
 import com.cdac.security.JwtUtils;
 
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.Authentication;
-import com.cdac.dao.PackageDao;
-import com.cdac.dto.*;
 
 @Service
 @Transactional
@@ -66,8 +61,13 @@ public class WasherServiceImpl implements WasherService {
         if (dto.getPassword() == null || dto.getPassword().isBlank()) {
             throw new IllegalArgumentException("Password cannot be null or blank");
         }
+        
+        dto.setRole(Role.WASHER);
+
 
         WasherEntity entity = dtoToEntity(dto);
+        entity.setRole(Role.WASHER); // Double-check in case mapper skips it
+
         WasherEntity saved = washerDao.save(entity);
 
         return entityToDto(saved); 
