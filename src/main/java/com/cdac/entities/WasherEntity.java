@@ -54,6 +54,11 @@ public class WasherEntity extends BaseEntity {
     private String area; // e.g., locality or service area
     
     
+//    //--------------->
+//    @NotBlank(message = "Role is required")
+//    @Column(nullable = false)
+//    private String role; // e.g., "ROLE_WASHER"
+    
  // Relationships
     @OneToMany(mappedBy = "washer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookingEntity> bookings = new ArrayList<>();

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 
 public class VehicleDto {
-//	private Long id;
+	private Long id;
     private Long userId;
     private String model;
     private String type;

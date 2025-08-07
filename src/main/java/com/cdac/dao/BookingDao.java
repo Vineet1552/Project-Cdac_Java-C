@@ -13,5 +13,8 @@ public interface BookingDao extends JpaRepository<BookingEntity, Long> {
 	List<BookingEntity> findByUser(UserEntity user);
 
 	List<BookingEntity> findByWasher(WasherEntity washer);
+	
+//	List<BookingEntity> findByUserIdAndPackageIdAndWasherIdAndStatusIn(Long userId, Long packageId, Long washerId, List<String> statuses);
+	List<BookingEntity> findByUserIdAndPackageEntityIdAndWasherIdAndStatusIn(Long userId, Long packageEntityId, Long washerId, List<String> statuses);
 
 }

@@ -32,6 +32,12 @@ public class WasherAuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResp> registerWasher(@RequestBody @Valid WasherDto washerDto) {
+    	
+    	// Default role to ROLE_WASHER if not provided
+        if (washerDto.getRole() == null || washerDto.getRole().isBlank()) {
+            washerDto.setRole("ROLE_WASHER");
+        }
+    	
         washerService.registerWasher(washerDto); // register only
 
         // Generate token manually

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +23,7 @@ import com.cdac.dto.SignupReqDto;
 import com.cdac.dto.UserRequestDto;
 import com.cdac.dto.UserResponseDto;
 import com.cdac.dto.VehicleDto;
+import com.cdac.entities.Role;
 import com.cdac.entities.UserEntity;
 import com.cdac.security.JwtUtils;
 
@@ -38,18 +40,57 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	
+	@Override
+    public UserResponseDto getUserByEmail(String email) {
+        UserEntity user = userDao.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
-	private UserEntity toEntity(UserRequestDto dto) {
-		UserEntity user = new UserEntity();
-		user.setFullName(dto.getFullName());
-		user.setEmail(dto.getEmail());
-		user.setPassword(dto.getPassword());
-		user.setPhone(dto.getPhone());
-		user.setIsActive(dto.getIsActive());
-		user.setRole(dto.getRole());
-//	        user.setRole(Role.valueOf(dto.getRole().toUpperCase()));
-		return user;
-	}
+        UserResponseDto userResponse = new UserResponseDto();
+        userResponse.setId(user.getId());
+        userResponse.setFullName(user.getFullName());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setRole(user.getRole());
+        userResponse.setPhone(user.getPhone());
+        userResponse.setIsActive(user.getIsActive());
+        userResponse.setVehicles(user.getVehicles().stream()
+                .map(vehicle -> {
+                    VehicleDto vehicleDto = new VehicleDto();
+                    vehicleDto.setId(vehicle.getId());
+                    vehicleDto.setUserId(vehicle.getUser().getId());
+                    vehicleDto.setModel(vehicle.getModel());
+                    vehicleDto.setType(vehicle.getType());
+                    vehicleDto.setRegNumber(vehicle.getRegNumber());
+                    return vehicleDto;
+                })
+                .toList());
+
+        return userResponse;
+    }
+	
+	@Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserEntity user = userDao.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .authorities(user.getRole().name())
+                .build();
+    }
+
+//	private UserEntity toEntity(UserRequestDto dto) {
+//		UserEntity user = new UserEntity();
+//		user.setFullName(dto.getFullName());
+//		user.setEmail(dto.getEmail());
+//		user.setPassword(dto.getPassword());
+//		user.setPhone(dto.getPhone());
+//		user.setIsActive(dto.getIsActive());
+//		user.setRole(dto.getRole());
+////	        user.setRole(Role.valueOf(dto.getRole().toUpperCase()));
+//		return user;
+//	}
 
 	private UserResponseDto toResponseDto(UserEntity entity) {
 		UserResponseDto dto = new UserResponseDto();
@@ -59,18 +100,35 @@ public class UserServiceImpl implements UserService {
 		dto.setPhone(entity.getPhone());
 		dto.setIsActive(entity.getIsActive());
 		dto.setRole(entity.getRole());
+		
+		// map vehicles (include id)
+        List<VehicleDto> vehicles = entity.getVehicles().stream().map(vehicle -> {
+            VehicleDto v = new VehicleDto();
+            v.setId(vehicle.getId());
+            v.setUserId(entity.getId());
+            v.setModel(vehicle.getModel());
+            v.setType(vehicle.getType());
+            v.setRegNumber(vehicle.getRegNumber());
+            return v;
+        }).collect(Collectors.toList());
+
+        dto.setVehicles(vehicles);
+		
+		
 		return dto;
 	}
 
-	@Override
-	public UserResponseDto createUser(UserRequestDto userDto) {
-		UserEntity user = toEntity(userDto);
-
-		String hashedPassword = passwordEncoder.encode(userDto.getPassword());
-		user.setPassword(hashedPassword);
-
-		return toResponseDto(userDao.save(user));
-	}
+//	@Override
+//	public UserResponseDto createUser(UserRequestDto userDto) {
+//		UserEntity user = toEntity(userDto);
+//
+//		String hashedPassword = passwordEncoder.encode(userDto.getPassword());
+//		user.setPassword(hashedPassword);
+//
+//		return toResponseDto(userDao.save(user));
+//	}
+	
+	
 
 	@Override
 	public UserResponseDto updateUser(Long id, UserRequestDto userDto) {
@@ -88,35 +146,38 @@ public class UserServiceImpl implements UserService {
 		return toResponseDto(userDao.save(user));
 	}
 
-	@Override
-	@Transactional
-	public UserResponseDto getUserById(Long id) {
-		UserEntity user = userDao.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
-
-		UserResponseDto dto = new UserResponseDto();
-		dto.setId(user.getId());
-		dto.setFullName(user.getFullName());
-		dto.setEmail(user.getEmail());
-		dto.setPhone(user.getPhone());
-		dto.setRole(user.getRole());
-		dto.setIsActive(user.getIsActive());
-
-		// Convert list of VehicleEntity to VehicleDto
-		List<VehicleDto> vehicles = user.getVehicles().stream().map(vehicle -> {
-			VehicleDto v = new VehicleDto();
-//	            v.setId(vehicle.getId());
-			v.setUserId(user.getId());
-			v.setModel(vehicle.getModel());
-			v.setType(vehicle.getType());
-			v.setRegNumber(vehicle.getRegNumber());
-			return v;
-		}).collect(Collectors.toList());
-
-		dto.setVehicles(vehicles);
-
-		return dto;
-	}
+	
+	
+//	@Override
+//    @Transactional
+//    public UserResponseDto getUserById(Long id, String requesterEmail) {
+//        // load the target user
+//        UserEntity user = userDao.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+//
+//        if (requesterEmail == null) {
+//            throw new AccessDeniedException("Authentication required");
+//        }
+//
+//        // if requester is same user -> allow
+//        if (requesterEmail.equalsIgnoreCase(user.getEmail())) {
+//            return toResponseDto(user);
+//        }
+//
+//        // otherwise check requester role (must be ADMIN)
+//        UserEntity requester = userDao.findByEmail(requesterEmail)
+//                .orElseThrow(() -> new ResourceNotFoundException("User", "email", requesterEmail));
+//
+//        if (requester.getRole() != Role.ADMIN) {
+//            throw new AccessDeniedException("You are not authorized to access this resource");
+//        }
+//        
+//     // requester is admin -> allowed
+//        return toResponseDto(user);
+//    }
+//	
+	
+	
 
 	@Override
 	public List<UserResponseDto> getAllUsers() {
@@ -152,6 +213,8 @@ public class UserServiceImpl implements UserService {
 		return toResponseDto(savedUser);
 	}
 
+	
+	
 	
 
 }

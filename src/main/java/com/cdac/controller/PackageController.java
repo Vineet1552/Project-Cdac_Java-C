@@ -1,7 +1,9 @@
 package com.cdac.controller;
 
 import com.cdac.dto.PackageDto;
+import com.cdac.dto.PackageRespDto;
 import com.cdac.service.PackageService;
+import com.cdac.service.WasherService;
 import com.cdac.security.JwtUtils;
 
 import jakarta.validation.Valid;
@@ -22,6 +24,9 @@ public class PackageController {
 
     @Autowired
     private JwtUtils jwtUtils;
+    
+    @Autowired
+    private WasherService washerService;
 
     // Create new service package
     @PostMapping
@@ -62,7 +67,23 @@ public class PackageController {
     @GetMapping
     public ResponseEntity<List<PackageDto>> getAllPackages(Authentication authentication) {
         String washerEmail = authentication.getName();
+        System.out.println("helllllllloooooo");
         List<PackageDto> washerPackages = packageService.getAllPackagesForWasher(washerEmail);
         return ResponseEntity.ok(washerPackages);
     }
+    
+    // public
+    @GetMapping("/public")
+    public ResponseEntity<List<PackageRespDto>> getAllPackages(@RequestParam Long washerId) {
+        List<PackageRespDto> packages = packageService.getAllPackagesForWasher(washerId);
+        return ResponseEntity.ok(packages);
+    }
+    
+//    @GetMapping
+//    public ResponseEntity<List<PackageDto>> getAllPackages(@RequestParam(required = false) String washerEmail) {
+//        List<PackageDto> washerPackages = washerEmail != null 
+//            ? washerService.getAllPackagesForWasher(washerEmail)
+//            : washerService.getAllWasherPackages();
+//        return ResponseEntity.ok(washerPackages);
+//    }
 }

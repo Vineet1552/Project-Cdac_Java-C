@@ -1,5 +1,6 @@
 package com.cdac.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +10,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthResp {
-    private String message;
-    private String jwtToken;
-    
-    
-//    private UserResponseDto user;
 
+
+public class SignInResponseDto {
+	private String message;
+    private String jwtToken;
+    private UserResponseDto user;
 }

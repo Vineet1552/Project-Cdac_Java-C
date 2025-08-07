@@ -23,7 +23,7 @@ public class WasherDto {
     @NotBlank(message = "Phone number is required")
     private String phone;
 
-    @NotBlank(message = "Status is required")
+    @NotBlank(message = "Status is required") 
     private String status;
 
     @NotNull(message = "Rating is required")
@@ -32,4 +32,7 @@ public class WasherDto {
 
     @NotBlank(message = "Area is required")
     private String area;
+    
+//    @NotBlank(message = "Role is required")
+//    private String role; // e.g., "ROLE_WASHER"
 }

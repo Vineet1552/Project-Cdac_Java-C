@@ -11,29 +11,41 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
+
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class UserController {
 
 	@Autowired
     private UserService userService;
 
-    @PostMapping
-    public UserResponseDto createUser(@RequestBody UserRequestDto userDto) {
-        return userService.createUser(userDto);
-    }
+//    @PostMapping
+//    public UserResponseDto createUser(@RequestBody UserRequestDto userDto) {
+//        return userService.createUser(userDto);
+//    }
 
     @PutMapping("/{id}")
     public UserResponseDto updateUser(@PathVariable Long id, @RequestBody UserRequestDto userDto) {
         return userService.updateUser(id, userDto);
     }
 
-    @GetMapping("/{id}")
-    public UserResponseDto getUser(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
-
+//    @GetMapping("/{id}")
+//    public UserResponseDto getUser(@PathVariable Long id) {
+//        return userService.getUserById(id);
+//    }
+    
+//    @GetMapping("/{id}")
+//    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long id, Authentication authentication) {
+//        String requesterEmail = (authentication != null) ? authentication.getName() : null;
+//        UserResponseDto dto = userService.getUserById(id, requesterEmail);
+//        return ResponseEntity.ok(dto);
+//    }
+  
+   
+    
     @GetMapping
     public List<UserResponseDto> getAllUsers() {
         return userService.getAllUsers();

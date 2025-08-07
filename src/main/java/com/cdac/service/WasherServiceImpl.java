@@ -1,6 +1,9 @@
 package com.cdac.service;
 
 import java.util.List;
+
+
+
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +16,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cdac.custom_exceptions.ResourceNotFoundException;
 import com.cdac.dao.WasherDao;
 import com.cdac.dto.BookingDto;
+import com.cdac.dto.PackageDto;
 import com.cdac.dto.ReviewDto;
 import com.cdac.dto.WasherDto;
+import com.cdac.entities.PackageEntity;
 import com.cdac.entities.WasherEntity;
 import com.cdac.security.JwtUtils;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import com.cdac.dao.PackageDao;
+import com.cdac.dto.*;
 
 @Service
 @Transactional
@@ -27,6 +35,9 @@ public class WasherServiceImpl implements WasherService {
 
     @Autowired
     private WasherDao washerDao;
+    
+    @Autowired
+    private PackageDao packageDao;
     
     @Autowired
     private BookingService bookingService; 
@@ -42,6 +53,12 @@ public class WasherServiceImpl implements WasherService {
 
     @Override
     public WasherDto registerWasher(WasherDto dto) {
+    	
+//    	// Check if email already exists
+//        if (washerDao.findByEmail(washerDto.getEmail()).isPresent()) {
+//            throw new IllegalStateException("Email already registered");
+//        }
+    	
         if (washerDao.findAll().stream().anyMatch(w -> w.getEmail().equals(dto.getEmail()))) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -56,25 +73,47 @@ public class WasherServiceImpl implements WasherService {
         return entityToDto(saved); 
     }
 
+//    @Override
+//    public String loginWasher(String email, String password) {
+//        WasherEntity washer = washerDao.findAll().stream()
+//            .filter(w -> w.getEmail().equals(email))
+//            .findFirst()
+//            .orElseThrow(() -> new RuntimeException("Washer not found"));
+//
+//        if (!passwordEncoder.matches(password, washer.getPassword())) {
+//            throw new RuntimeException("Invalid credentials");
+//        }
+//
+//        return jwtUtils.generateJwtToken(
+//            new UsernamePasswordAuthenticationToken(
+//                email,
+//                null,
+//                List.of(new SimpleGrantedAuthority("ROLE_WASHER"))
+//            )
+//        );
+//    }
     @Override
     public String loginWasher(String email, String password) {
-        WasherEntity washer = washerDao.findAll().stream()
-            .filter(w -> w.getEmail().equals(email))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Washer not found"));
+        // 1. Find washer by email
+        WasherEntity washer = washerDao.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Washer not found with email: " + email));
 
+        // 2. Check password
         if (!passwordEncoder.matches(password, washer.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtUtils.generateJwtToken(
-            new UsernamePasswordAuthenticationToken(
-                email,
+        // 3. Create authentication object for JWT
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                washer.getEmail(),
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_WASHER"))
-            )
         );
+
+        // 4. Generate JWT
+        return jwtUtils.generateJwtToken(authentication);
     }
+
 
     @Override
     public WasherDto getWasherProfile(String email) {
@@ -150,6 +189,15 @@ public class WasherServiceImpl implements WasherService {
         List<WasherEntity> washers = washerDao.findAll();
         return washers.stream().map(this::entityToDto).collect(Collectors.toList());
     }
+    
+    
+
+   
+    
+    
+    
+    
+    
 
     @Override
     public void deleteWasher(Long id) {

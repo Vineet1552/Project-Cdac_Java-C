@@ -20,6 +20,15 @@ public class WasherController {
 
     @Autowired
     private WasherService washerService;
+    
+    
+//    @GetMapping
+//    public ResponseEntity<List<PackageDto>> getAllPackages(@RequestParam(required = false) String washerEmail) {
+//        List<PackageDto> washerPackages = washerEmail != null 
+//            ? washerService.getAllPackagesForWasher(washerEmail)
+//            : washerService.getAllWasherPackages();
+//        return ResponseEntity.ok(washerPackages);
+//    }
 
     // ======================== Washer Profile ========================
 
@@ -67,7 +76,7 @@ public class WasherController {
 
     // ======================== Admin CRUD Operations ========================
 
-    // 🔒 Admin: Get all washers
+    // 🔒 Admin: Get all washers --> i want to get all with user login
     @GetMapping
     public ResponseEntity<List<WasherDto>> getAllWashers() {
         return ResponseEntity.ok(washerService.getAllWashers());

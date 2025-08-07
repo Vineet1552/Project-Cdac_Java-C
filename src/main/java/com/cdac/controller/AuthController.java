@@ -1,7 +1,9 @@
 package com.cdac.controller;
 
 import com.cdac.dto.SignInDto;
+import com.cdac.dto.SignInResponseDto;
 import com.cdac.dto.SignupReqDto;
+import com.cdac.dto.UserResponseDto;
 import com.cdac.dto.AuthResp;
 import com.cdac.security.JwtUtils;
 import com.cdac.service.UserService;
@@ -37,16 +39,32 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResp("User registered successfully", token));
     }
 
-    // ✅ Login and return JWT
+//    // ✅ Login and return JWT
+//    @PostMapping("/signin")
+//    public ResponseEntity<AuthResp> signIn(@RequestBody @Valid SignInDto signInDto) {
+//        Authentication authentication = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        signInDto.getEmail(), signInDto.getPassword()
+//                )
+//        );
+//
+//        String token = jwtUtils.generateJwtToken(authentication);
+//        return ResponseEntity.ok(new AuthResp("Login successful", token));
+//    }
+    
+   
+    // edited 
     @PostMapping("/signin")
-    public ResponseEntity<AuthResp> signIn(@RequestBody @Valid SignInDto signInDto) {
+    public ResponseEntity<SignInResponseDto> signIn(@RequestBody @Valid SignInDto signInDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         signInDto.getEmail(), signInDto.getPassword()
                 )
         );
-
         String token = jwtUtils.generateJwtToken(authentication);
-        return ResponseEntity.ok(new AuthResp("Login successful", token));
+        UserResponseDto userResponse = userService.getUserByEmail(signInDto.getEmail());
+        return ResponseEntity.ok(new SignInResponseDto("Login successful", token, userResponse));
     }
+    
+   
 }

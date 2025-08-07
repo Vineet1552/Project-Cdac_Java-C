@@ -19,4 +19,6 @@ public class WasherSignUpDto {
 
     @NotBlank
     private String area;
+    
+    private String role; // Optional, defaults to "ROLE_WASHER"
 }
